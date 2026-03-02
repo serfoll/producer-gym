@@ -5,7 +5,7 @@ After uploading their version, they receive instant, objective scoring and see t
 
 ## Deisgn
 
-[![Wireframe]]('./design/wireframe.png')
+[![Wireframe]](./design/wireframe.png)
 
 ## Getting Started
 
