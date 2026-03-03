@@ -13,55 +13,58 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model Challenge {
-id String @id @default(cuid())
-title String
-description String?
+  id          String  @id @default(cuid())
+  title       String
+  description String?
 
-// Reference audio
-referenceBlobUrl String
-referenceDuration Float
-bpm Float
-key String
+  // Reference audio
+  blobUrl  String
+  duration Float
 
-// Precomputed DSP snashop
-referenceFeatures Json
+  // Cached metadata (derived from referenceFeatures)
+  bpm Float
+  key String
 
-// Daily rotation
-activeDate DateTime @unique
-isActive Boolean @default(true)
+  // Precomputed DSP snapshot
+  referenceFeatures Json
 
-submissions Submission[]
+  // Daily rotation
+  activeDate DateTime @unique
+  isActive   Boolean  @default(true)
 
-// metadata
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
+  submissions Submission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-model Submission{
-id String @id @default(cuid())
-challengeId String
-challenge Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+model Submission {
+  id String @id @default(cuid())
 
-// audio
-blobUrl String
-duration Float
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 
-username String
+  blobUrl  String
+  duration Float
 
-// Score
-overallScore Float
-tempoScore Float
-keySocre Float
-rhythmScore Float
-energyScore Float
+  submissionFeatures Json
 
-processingTimeMs Int?
+  username String
 
-//metadata
-createdAt DateTime @default(now())
+  overallScore Float
+  tempoScore   Float
+  keyScore     Float
+  rhythmScore  Float
+  energyScore  Float
 
-// optimized leaderboard index
-@@index([challengeId, overallScore(sort: Desc)])
+  processingTimeMs Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // only one submission per user per challenge
+  @@unique([challengeId, username])
+  // optimized leaderboard index, order by the in case score is tied
+  @@index([challengeId, overallScore(sort: Desc), createdAt])
 }
