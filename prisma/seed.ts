@@ -1,11 +1,16 @@
-import { PrismaClient, Prisma } from "@/app/generated/prisma/client";
+import { type Prisma, PrismaClient } from "@/app/generated/prisma/client";
+import {
+  createContainer,
+  createServiceClient,
+  uploadBlobFromLocalPath,
+} from "@/lib/services/azure";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { create } from "domain";
 import "dotenv/config";
 
 const adapter = new PrismaPg({
   connectionString: process.env.DATABASE_URL,
 });
+
 const prisma = new PrismaClient({
   adapter,
 });
@@ -70,8 +75,29 @@ const challengeData: Prisma.ChallengeCreateInput[] = [
   },
 ];
 
+import path from "node:path";
+
+async function createBlob(blobName: string, fileName: string) {
+  const serviceClient = createServiceClient();
+
+  const containerClient = await createContainer(serviceClient, "dev");
+
+  const cAudio = await uploadBlobFromLocalPath(
+    containerClient,
+    blobName,
+    path.resolve(fileName),
+  );
+
+  return cAudio.client.url;
+}
+
 export async function main() {
   for (const c of challengeData) {
+    const blobUrl = await createBlob(
+      "challenge_mellow_chords.wav",
+      "./audio/challenge.wav",
+    );
+    c.blobUrl = blobUrl;
     await prisma.challenge.create({ data: c });
   }
 }
