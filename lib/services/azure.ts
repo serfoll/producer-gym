@@ -8,13 +8,9 @@ import {
   type BlockBlobParallelUploadOptions,
 } from "@azure/storage-blob";
 
-import fs from "node:fs";
-import { readFile } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
-
 export function createServiceClient(): BlobServiceClient {
   try {
-    const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME as string;
+    const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME ?? "";
     if (!accountName) throw new Error(`Azure Storage accountName not found`);
 
     // Add `Storage Blob Data Contributor` role assignment to the identity
@@ -57,6 +53,7 @@ export async function uploadBlobFromLocalPath(
   containerClient: ContainerClient,
   blobName: string,
   localFilePath: string,
+  contentType: string,
 ): Promise<{ res: BlobUploadCommonResponse; client: BlockBlobClient }> {
   // Create blob client from container client
   const blockBlobClient: BlockBlobClient =
@@ -64,7 +61,7 @@ export async function uploadBlobFromLocalPath(
 
   const uploadOptions: BlockBlobParallelUploadOptions = {
     blobHTTPHeaders: {
-      blobContentType: "audio/wav",
+      blobContentType: contentType,
     },
   };
 
