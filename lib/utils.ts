@@ -10,6 +10,7 @@ import {
   createServiceClient,
   uploadBlobFromLocalPath,
 } from "./services/azure";
+import crypto from "node:crypto";
 
 export async function createBlobFromLocalPath(fileName: string) {
   const serviceClient = createServiceClient();
@@ -29,8 +30,10 @@ export async function createBlobFromLocalPath(fileName: string) {
   return cAudio.client.url;
 }
 
+export const generateEncryptedString = async (byte = 32): Promise<string> =>
+  crypto.randomBytes(byte).toString("hex");
+
 export async function generateSASURL(
-  blobName: string,
   contentType: string,
 ): Promise<{ [key: string]: string }> {
   try {
@@ -46,6 +49,8 @@ export async function generateSASURL(
       startsOn,
       expiresOn,
     );
+
+    const blobName = await generateEncryptedString();
 
     const containerSASToken = generateBlobSASQueryParameters(
       {
@@ -67,5 +72,46 @@ export async function generateSASURL(
     return { url: blobSasUrl, blobPath: blobName };
   } catch (error) {
     return { failed: `Something went wrong: ${error}` };
+  }
+}
+
+export async function uploadBlodViaSAS(
+  file: File,
+): Promise<{ [key: string]: string | URL }> {
+  try {
+    const getSignedUrl = await generateSASURL(file?.type);
+
+    if (
+      getSignedUrl?.failed !== undefined ||
+      (!getSignedUrl?.url && getSignedUrl?.url === "")
+    ) {
+      throw new Error(getSignedUrl?.failed);
+    }
+
+    const uploadUrl = getSignedUrl?.url;
+
+    const uploadResponse = await fetch(uploadUrl, {
+      method: "PUT",
+      body: file,
+      headers: {
+        //MANDATORY FOR AZURE!
+        "x-ms-blob-type": "BlockBlob",
+        "Content-Type": file?.type,
+      },
+    });
+
+    if (!uploadResponse.ok) {
+      throw new Error(
+        `staus: ${uploadResponse.status},statusText: ${uploadResponse.statusText}`,
+      );
+    }
+    return {
+      url: new URL(uploadUrl.split("?")[0]) || undefined,
+    };
+  } catch (error) {
+    return {
+      failed: "Failed to upload track",
+      reason: `${error}`,
+    };
   }
 }
