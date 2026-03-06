@@ -21,7 +21,10 @@ export async function addChallengeActionState(
   try {
     const getSignedUrl = await generateSASURL(fileName, file?.type);
 
-    if (getSignedUrl?.failed !== undefined) {
+    if (
+      getSignedUrl?.failed !== undefined ||
+      (!getSignedUrl?.url && getSignedUrl?.url === "")
+    ) {
       console.error(getSignedUrl?.failed);
       return {
         message: "Something went wrong, please try again",
@@ -29,10 +32,9 @@ export async function addChallengeActionState(
       };
     }
 
-    const { url: signedUrl } = getSignedUrl;
-    console.log(signedUrl);
+    const uploadUrl = getSignedUrl?.url;
 
-    const uploadResponse = await fetch(signedUrl, {
+    const uploadResponse = await fetch(uploadUrl, {
       method: "PUT",
       body: file,
       headers: {

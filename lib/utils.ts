@@ -32,7 +32,7 @@ export async function createBlobFromLocalPath(fileName: string) {
 export async function generateSASURL(
   blobName: string,
   contentType: string,
-): Promise<{ [key: string]: string | unknown }> {
+): Promise<{ [key: string]: string }> {
   try {
     const blobServiceClient = createServiceClient();
 
@@ -66,6 +66,6 @@ export async function generateSASURL(
 
     return { url: blobSasUrl, blobPath: blobName };
   } catch (error) {
-    return { failed: error };
+    return { failed: `Something went wrong: ${error}` };
   }
 }
