@@ -1,6 +1,6 @@
 "use server";
 import type { ActionState } from "./types";
-import { generateSASURL } from "./utils";
+import { generateSASURL, uploadBlodViaSAS } from "./utils";
 
 export async function addChallengeActionState(
   _prevState: ActionState,
@@ -14,42 +14,12 @@ export async function addChallengeActionState(
     file: file,
   };
 
-  const fileName = file?.name.split(" ")
-    ? file?.name.split(" ").join("_").toLowerCase()
-    : file?.name.toLowerCase();
-
   try {
-    const getSignedUrl = await generateSASURL(fileName, file?.type);
+    const blobUrl = await uploadBlodViaSAS(file);
 
-    if (getSignedUrl?.failed !== undefined) {
-      console.error(getSignedUrl?.failed);
-      return {
-        message: "Something went wrong, please try again",
-        data: newChallengeData,
-      };
-    }
-
-    const { url: signedUrl } = getSignedUrl;
-    console.log(signedUrl);
-
-    const uploadResponse = await fetch(signedUrl, {
-      method: "PUT",
-      body: file,
-      headers: {
-        //MANDATORY FOR AZURE!
-        "x-ms-blob-type": "BlockBlob",
-        "Content-Type": file?.type,
-      },
-    });
-
-    if (!uploadResponse.ok) {
-      console.error(uploadResponse.statusText);
-      console.error(uploadResponse.status);
-
-      return {
-        message: "Failed to create challenge!",
-        data: newChallengeData,
-      };
+    if (blobUrl?.failed || !blobUrl?.url) {
+      console.error(blobUrl?.reason);
+      throw new Error(blobUrl?.failed.toString());
     }
 
     return {
