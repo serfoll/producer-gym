@@ -1,11 +1,10 @@
 import { spawn } from "node:child_process";
 import { Essentia, EssentiaWASM } from "essentia.js";
-import type EssentiaTypes from "../node_modules/essentia.js/dist/core_api";
-import Ffmpeg from "fluent-ffmpeg";
-import { resolve4 } from "node:dns";
+import type EssentiaType from "../node_modules/essentia.js/dist/core_api";
+import { sign } from "node:crypto";
 
 //1. Initialise Essentia
-let essentia: EssentiaTypes;
+let essentia: EssentiaType;
 
 const getEssentia = () => {
   if (!essentia) {
@@ -60,10 +59,51 @@ async function decodeAudioToFloat32(url: string): Promise<Float32Array> {
   });
 }
 
+// 3. compute normalized RMS energy envelope.
+function computeEnergyEnvelope(
+  essentia: EssentiaType,
+  signal: Float32Array,
+  buckets = 15,
+) {
+  const frameSize = 1024;
+  const hopSize = 512;
+
+  const rmsValues: number[] = [];
+
+  for (let i = 0; i + frameSize <= signal.length; i += hopSize) {
+    const frame = signal.slice(i, i + frameSize);
+
+    // Convert Float32Array → VectorFloat
+    const vector = essentia.arrayToVector(frame);
+
+    const rms = essentia.RMS(vector).rms;
+
+    rmsValues.push(rms);
+    // free up up the WASM memory to prevent memory leak
+    vector.delete();
+  }
+
+  const max = Math.max(...rmsValues) || 1;
+
+  // evenly spaced buckets across the whole signal
+  const normalized = rmsValues.map((v) => v / max);
+
+  const step = Math.floor(normalized.length / buckets);
+  const envelope: number[] = [];
+
+  for (let i = 0; i < buckets; i++) {
+    envelope.push(normalized[i * step] ?? 0);
+  }
+
+  return envelope;
+}
+
 export async function anaylizeAndExtractAudioFeatures(blobUrl: string) {
   const essentia = getEssentia();
 
   const signal = await decodeAudioToFloat32(blobUrl);
 
-  return signal;
+  const energyEnvelope = computeEnergyEnvelope(essentia, signal);
+
+  return energyEnvelope;
 }

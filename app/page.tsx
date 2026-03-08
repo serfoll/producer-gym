@@ -4,7 +4,7 @@ import prisma from "@/lib/services/prisma";
 export default async function Home() {
   const challenges = await prisma.challenge.findMany();
   const tempBlobUrl =
-    "https://prgymstorage.blob.core.windows.net/dev/35914a0035a50c7efd6f2fd0012cd4a3c809b498a1dd4843ef7ddfd1db8a4caf";
+    "https://prgymstorage.blob.core.windows.net/dev/3900ebf21a0373178c6ea00b20b9c3c9cae6d9b2a3e7043a0496895b87f2bc33";
   const features = await anaylizeAndExtractAudioFeatures(tempBlobUrl);
 
   console.log(`anaylizeAndExtractAudioFeatures: ${features}`);
