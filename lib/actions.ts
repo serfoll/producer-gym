@@ -1,5 +1,5 @@
 "use server";
-import { processAndExtractFeature } from "./audio-processor";
+import { anaylizeAndExtractAudioFeatures } from "./audio-analyzer";
 import type { ActionState } from "./types";
 import { uploadBlodViaSAS } from "./utils";
 
@@ -22,9 +22,11 @@ export async function addChallengeActionState(
       throw new Error(blobUrl?.reason as string);
     }
 
-    const features = await processAndExtractFeature(blobUrl?.url);
+    const features = await anaylizeAndExtractAudioFeatures(
+      blobUrl?.url.toString(),
+    );
 
-    console.log("features");
+    console.log("features: ", features);
 
     return {
       message: "Challenge has been created",

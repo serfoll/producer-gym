@@ -1,7 +1,6 @@
 import { spawn } from "node:child_process";
 import { Essentia, EssentiaWASM } from "essentia.js";
 import type EssentiaType from "../node_modules/essentia.js/dist/core_api";
-import { sign } from "node:crypto";
 
 //1. Initialise Essentia
 let essentia: EssentiaType;
@@ -64,7 +63,7 @@ function computeEnergyEnvelope(
   essentia: EssentiaType,
   signal: Float32Array,
   buckets = 15,
-) {
+): number[] {
   const frameSize = 1024;
   const hopSize = 512;
 
@@ -98,12 +97,40 @@ function computeEnergyEnvelope(
   return envelope;
 }
 
+//4. Compute spectral centroid stats
+function computeSpectral(essentia: EssentiaType, signal: Float32Array) {
+  const frameSize = 1024;
+  const hopSize = 512;
+
+  const frames = essentia.FrameGenerator(signal, frameSize, hopSize);
+  const centroids: number[] = [];
+
+  for (let i = 0; i + frameSize <= signal.length; i += hopSize) {
+    const frame = signal.slice(i, i + frameSize);
+
+    // Convert Float32Array → VectorFloat
+    const vector = essentia.arrayToVector(frame);
+    const centroid = essentia.Centroid(vector).centroid;
+
+    centroids.push(centroid);
+  }
+
+  const mean = centroids.reduce((a, b) => a + b, 0);
+
+  const std = Math.sqrt(
+    centroids.reduce((sum, v) => sum + (v - mean) ** 2, 0) / centroids.length,
+  );
+
+  return { centroid: mean, centroidStd: std };
+}
+
 export async function anaylizeAndExtractAudioFeatures(blobUrl: string) {
   const essentia = getEssentia();
 
   const signal = await decodeAudioToFloat32(blobUrl);
 
   const energyEnvelope = computeEnergyEnvelope(essentia, signal);
+  const spectral = computeSpectral(essentia, signal);
 
-  return energyEnvelope;
+  return { energy: energyEnvelope, spectral: spectral };
 }
