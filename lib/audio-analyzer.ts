@@ -124,13 +124,22 @@ function computeSpectral(essentia: EssentiaType, signal: Float32Array) {
   return { centroid: mean, centroidStd: std };
 }
 
+//5. Analyse audio and extract features
 export async function anaylizeAndExtractAudioFeatures(blobUrl: string) {
+  // initial
   const essentia = getEssentia();
-
   const signal = await decodeAudioToFloat32(blobUrl);
+  const signalVector = essentia.arrayToVector(signal);
+
+  //Tempo detection
+  const rhythm = essentia.RhythmExtractor2013(signalVector);
+  const tempo = {
+    bpm: rhythm.bpm,
+    confidence: rhythm.confidence,
+  };
 
   const energyEnvelope = computeEnergyEnvelope(essentia, signal);
   const spectral = computeSpectral(essentia, signal);
 
-  return { energy: energyEnvelope, spectral: spectral };
+  return { tempo, energy: energyEnvelope, spectral: spectral };
 }
