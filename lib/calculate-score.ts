@@ -22,12 +22,24 @@ function scoreKey(a: TrackFeatures, b: TrackFeatures): number {
   return 0;
 }
 
+// rhythm score
+function scoreRhythm(a: TrackFeatures, b: TrackFeatures): number {
+  const onsetDiff = Math.abs(a.rhythm.onsetRate - b.rhythm.onsetRate);
+  const hfcDiff = Math.abs(a.rhythm.hfcMean - b.rhythm.hfcMean);
+
+  const onsetScore = clamp(1 - onsetDiff / 3);
+  const hfcScore = clamp(1 - hfcDiff / 1);
+
+  return (onsetScore + hfcScore) / 2;
+}
+
 export function submissionScore(
   reference: TrackFeatures,
   submission: TrackFeatures,
 ) {
   const tempoScore = scoreTempo(reference, submission);
   const keyScore = scoreKey(reference, submission);
+  const rhythmScore = scoreRhythm(reference, submission);
 
-  return { tempoScore, keyScore };
+  return { tempoScore, keyScore, rhythmScore };
 }
