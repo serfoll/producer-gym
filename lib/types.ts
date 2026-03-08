@@ -11,19 +11,38 @@ export type NewChallge = {
 };
 
 export type TrackFeatures = {
-  tempo: { bpm: number; confidence: number; onsetRate: number };
-  key: { estimatedKey: string; mode: string; strength: number };
-  drumAccuracy: {
-    hfcMean: number;
-    beatsLoudnessMean: number;
+  tempo: {
+    bpm: number;
+    confidence: number;
     onsetRate: number;
   };
-  mixAndEnergy: {
+
+  key: {
+    estimatedKey: string;
+    mode: string;
+    strength: number;
+  };
+
+  rhythm: {
+    onsetRate: number;
+    hfcMean: number;
+  };
+
+  dynamics: {
     rmsMean: number;
     dynamicComplexity: number;
     integratedLoudness: number;
     loudnessRange: number;
+  };
+
+  spectral: {
+    centroidMean: number;
+    centroidStd: number;
     spectralFluxMean: number;
   };
-  energyEnvelope: number[];
+
+  structure: {
+    energyEnvelope: number[];
+  };
+  analysisVersion: string;
 };
