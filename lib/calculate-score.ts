@@ -33,6 +33,20 @@ function scoreRhythm(a: TrackFeatures, b: TrackFeatures): number {
   return (onsetScore + hfcScore) / 2;
 }
 
+// dynamics score
+
+function scoreDynamics(a: TrackFeatures, b: TrackFeatures): number {
+  const rmsDiff = Math.abs(a.dynamics.rmsMean - b.dynamics.rmsMean);
+  const loudnessDiff = Math.abs(
+    a.dynamics.integratedLoudness - b.dynamics.integratedLoudness,
+  );
+
+  const rmsScore = clamp(1 - rmsDiff / 0.5);
+  const loudnessScore = clamp(1 - loudnessDiff / 20);
+
+  return (rmsScore + loudnessScore) / 2;
+}
+
 export function submissionScore(
   reference: TrackFeatures,
   submission: TrackFeatures,
@@ -40,6 +54,7 @@ export function submissionScore(
   const tempoScore = scoreTempo(reference, submission);
   const keyScore = scoreKey(reference, submission);
   const rhythmScore = scoreRhythm(reference, submission);
+  const dynamicsScore = scoreDynamics(reference, submission);
 
-  return { tempoScore, keyScore, rhythmScore };
+  return { tempoScore, keyScore, rhythmScore, dynamicsScore };
 }
