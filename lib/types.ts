@@ -46,3 +46,7 @@ export type TrackFeatures = {
   };
   analysisVersion: string;
 };
+
+export interface Score {
+  [score: string]: number;
+}

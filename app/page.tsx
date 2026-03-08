@@ -2,6 +2,11 @@ import { anaylizeAndExtractAudioFeatures } from "@/lib/audio-analyzer";
 import { submissionScore } from "@/lib/calculate-score";
 import prisma from "@/lib/services/prisma";
 
+const capitaliseScoreKeyString = (key: string): string => {
+  const keyStr = key.split("Score")[0];
+  return keyStr.charAt(0).toUpperCase() + keyStr.slice(1);
+};
+
 export default async function Home() {
   const challenges = await prisma.challenge.findMany();
   const tempBlobUrl =
@@ -12,8 +17,8 @@ export default async function Home() {
   const features = await anaylizeAndExtractAudioFeatures(tempBlobUrl);
   const featuresSub = await anaylizeAndExtractAudioFeatures(tempSubUrl);
 
-  const scoreSameSame = submissionScore(features, features) as object;
-  const scoreDiff = submissionScore(features, featuresSub) as object;
+  const scoreSameSame = submissionScore(features, features);
+  const scoreDiff = submissionScore(features, featuresSub);
 
   return (
     <main>
@@ -21,10 +26,23 @@ export default async function Home() {
       <audio src={challenges[0].blobUrl} autoPlay controls>
         <track default kind="captions" />
       </audio>
-      <h2>Same Tracks</h2>
-      <p>{JSON.stringify(scoreSameSame)}</p>
-      <h2>Different Tracks</h2>
-      <p>{JSON.stringify(scoreDiff)}</p>
+      <h2>Your Score: {scoreSameSame.overallScore}%</h2>
+      <ul>
+        {Object.keys(scoreSameSame).map((key) => (
+          <li key={`sub-${key}`}>
+            {capitaliseScoreKeyString(key)} Math: {scoreSameSame[key]}
+          </li>
+        ))}
+      </ul>
+
+      <h2>Different Tracks Score: {scoreDiff.overallScore}%</h2>
+      <ul>
+        {Object.keys(scoreDiff).map((key) => (
+          <li key={`sub-${key}`}>
+            {capitaliseScoreKeyString(key)} Math: {scoreDiff[key]}
+          </li>
+        ))}
+      </ul>
     </main>
   );
 }
