@@ -1,10 +1,9 @@
-"use server";
+import path from "node:path";
 import {
   generateBlobSASQueryParameters,
   ContainerSASPermissions,
   SASProtocol,
 } from "@azure/storage-blob";
-import path from "node:path";
 import {
   createContainer,
   createServiceClient,
@@ -115,4 +114,8 @@ export async function uploadBlodViaSAS(
       reason: `${error}`,
     };
   }
+}
+
+export function clamp(value: number, min = 0, max = 1): number {
+  return Math.min(max, Math.max(min, value));
 }
