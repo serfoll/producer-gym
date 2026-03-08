@@ -1,4 +1,5 @@
 import { anaylizeAndExtractAudioFeatures } from "@/lib/audio-analyzer";
+import { submissionScore } from "@/lib/calculate-score";
 import prisma from "@/lib/services/prisma";
 
 export default async function Home() {
@@ -11,8 +12,8 @@ export default async function Home() {
   const features = await anaylizeAndExtractAudioFeatures(tempBlobUrl);
   const featuresSub = await anaylizeAndExtractAudioFeatures(tempSubUrl);
 
-  console.log(`featuresChallenge: ${JSON.stringify(features)}`);
-  console.log(`featuresSubmission: ${JSON.stringify(featuresSub)}`);
+  const scoreSameSame = submissionScore(features, features) as object;
+  const scoreDiff = submissionScore(features, featuresSub) as object;
 
   return (
     <main>
@@ -20,6 +21,10 @@ export default async function Home() {
       <audio src={challenges[0].blobUrl} autoPlay controls>
         <track default kind="captions" />
       </audio>
+      <h2>Same Tracks</h2>
+      <p>{JSON.stringify(scoreSameSame)}</p>
+      <h2>Different Tracks</h2>
+      <p>{JSON.stringify(scoreDiff)}</p>
     </main>
   );
 }
