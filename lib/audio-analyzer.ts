@@ -138,8 +138,16 @@ export async function anaylizeAndExtractAudioFeatures(blobUrl: string) {
     confidence: rhythm.confidence,
   };
 
+  // Key detection
+  const keyResult = essentia.KeyExtractor(signalVector);
+  const key = {
+    estimatedKey: keyResult.key,
+    mode: keyResult.scale,
+    confidence: keyResult.strength,
+  };
+
   const energyEnvelope = computeEnergyEnvelope(essentia, signal);
   const spectral = computeSpectral(essentia, signal);
 
-  return { tempo, energy: energyEnvelope, spectral: spectral };
+  return { tempo, key, energy: { energyEnvelope }, spectral: spectral };
 }
