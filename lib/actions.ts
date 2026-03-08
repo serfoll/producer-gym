@@ -1,6 +1,7 @@
 "use server";
+import { anaylizeAndExtractAudioFeatures } from "./audio-analyzer";
 import type { ActionState } from "./types";
-import { generateSASURL, uploadBlodViaSAS } from "./utils";
+import { uploadBlodViaSAS } from "./utils";
 
 export async function addChallengeActionState(
   _prevState: ActionState,
@@ -17,17 +18,22 @@ export async function addChallengeActionState(
   try {
     const blobUrl = await uploadBlodViaSAS(file);
 
-    if (blobUrl?.failed || !blobUrl?.url) {
-      console.error(blobUrl?.reason);
-      throw new Error(blobUrl?.failed.toString());
+    if (blobUrl?.failed) {
+      throw new Error(blobUrl?.reason as string);
     }
+
+    const features = await anaylizeAndExtractAudioFeatures(
+      blobUrl?.url.toString(),
+    );
+
+    console.log("features: ", features);
 
     return {
       message: "Challenge has been created",
       data: formData,
     };
   } catch (error) {
-    console.error("Catch error: ", error);
+    console.error("Reason: ", error);
     return {
       message: "Failed to create challenge!",
       data: newChallengeData,

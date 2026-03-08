@@ -69,7 +69,7 @@ export async function generateSASURL(
 
     const blobSasUrl = `https://${accountName}.blob.core.windows.net/${containerName}/${blobName}?${containerSASToken}`;
 
-    return { url: blobSasUrl, blobPath: blobName };
+    return { url: blobSasUrl, blobPath: blobName, containerName };
   } catch (error) {
     return { failed: `Something went wrong: ${error}` };
   }
@@ -81,14 +81,11 @@ export async function uploadBlodViaSAS(
   try {
     const getSignedUrl = await generateSASURL(file?.type);
 
-    if (
-      getSignedUrl?.failed !== undefined ||
-      (!getSignedUrl?.url && getSignedUrl?.url === "")
-    ) {
+    if (getSignedUrl?.failed || !getSignedUrl?.url) {
       throw new Error(getSignedUrl?.failed);
     }
 
-    const uploadUrl = getSignedUrl?.url;
+    const { url: uploadUrl, blobPath, containerName } = getSignedUrl;
 
     const uploadResponse = await fetch(uploadUrl, {
       method: "PUT",
@@ -105,8 +102,12 @@ export async function uploadBlodViaSAS(
         `staus: ${uploadResponse.status},statusText: ${uploadResponse.statusText}`,
       );
     }
+
+    const cdnUrl = process.env.AZURE_STORAGE_FRONT_DOOR_URL;
+    const url = new URL(`https://${cdnUrl}/${containerName}/${blobPath}`);
+
     return {
-      url: new URL(uploadUrl.split("?")[0]) || undefined,
+      url: url?.href ?? undefined,
     };
   } catch (error) {
     return {
