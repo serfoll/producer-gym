@@ -1,6 +1,6 @@
 "use server";
 import { anaylizeAndExtractAudioFeatures } from "./audio-analyzer";
-import type { ActionState } from "./types";
+import { StatusState, type ActionState } from "./types";
 import { uploadBlodViaSAS } from "./utils";
 
 export async function addChallengeActionState(
@@ -23,13 +23,12 @@ export async function addChallengeActionState(
     }
 
     const features = await anaylizeAndExtractAudioFeatures(
-      blobUrl?.url.toString(),
+      blobUrl?.url?.toString(),
     );
-
-    console.log("features: ", features);
 
     return {
       message: "Challenge has been created",
+      status: StatusState.SUCCESS,
       data: formData,
     };
   } catch (error) {
@@ -37,6 +36,8 @@ export async function addChallengeActionState(
     return {
       message: "Failed to create challenge!",
       data: newChallengeData,
+      status: StatusState.ERROR,
+      error: { reason: `${error}` },
     };
   }
 }
