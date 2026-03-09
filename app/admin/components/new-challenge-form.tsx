@@ -3,43 +3,27 @@
 import Form from "next/form";
 import type { File } from "node:buffer";
 import { useActionState, useState } from "react";
-import { type ActionState, type NewChallenge, StatusState } from "@/lib/types";
+import type { ActionState, NewChallenge } from "@/lib/types";
 import { addChallengeActionState } from "@/lib/actions";
-import { useFormStatus } from "react-dom";
+import StatusDisplay from "./status-display";
+import { addDays } from "date-fns";
 
 const initialState: ActionState = null;
-
-const StatusDisplay = ({
-  message,
-  state: status,
-  error,
-}: {
-  message: string | undefined;
-  state?: StatusState;
-  error?: Record<string, string>;
-}) => {
-  const { pending } = useFormStatus();
-
-  return pending || message ? (
-    <div
-      className={`${status === StatusState.SUCCESS ? "bg-green-100" : status === StatusState.ERROR ? "bg-red-100" : "bg-yellow-100"} my-2.5 flex h-12.5 w-full items-center rounded-xl  px-4 font-medium`}
-    >
-      <p
-        className={`${status === StatusState.SUCCESS ? "text-green-700" : status === StatusState.ERROR ? "text-red-700" : "text-yellow-700"}`}
-      >
-        {pending ? "Creating challenge.." : error ? error?.reason : message}
-      </p>
-    </div>
-  ) : null;
-};
 
 export default function NewChallengeForm() {
   const [state, formAction, pending] = useActionState(
     addChallengeActionState,
     initialState,
   );
-
   const data = state?.data as NewChallenge;
+  const today = new Date();
+  const tomorrow = addDays(
+    new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate())),
+    1,
+  )
+    .toISOString()
+    .split("T")[0];
+  console.log("toISOString: ", tomorrow);
 
   const [track, setTrack] = useState<File | undefined>(undefined);
   const [fileUrl, setFileUrl] = useState<string | undefined>(undefined);
@@ -66,14 +50,20 @@ export default function NewChallengeForm() {
     <Form
       action={formAction}
       className="grid bg-neutral-50 p-4 rounded-lg space-y-4 shadow"
+      aria-describedby="formHelperText"
     >
       <StatusDisplay
         message={state?.message}
         state={state?.status}
         error={state?.error}
       />
-      <label htmlFor="title" className="flex justify-between gap-4">
-        <span>Title: </span>
+      <label
+        htmlFor="title"
+        className="flex justify-between gap-4 items-center"
+      >
+        <span>
+          Title<span className="text-red-400">*</span>:{" "}
+        </span>
         <input
           type="text"
           name="title"
@@ -84,8 +74,13 @@ export default function NewChallengeForm() {
         />
       </label>
 
-      <label htmlFor="audioFile" className="flex justify-between gap-4">
-        <span>Track:</span>
+      <label
+        htmlFor="audioFile"
+        className="flex justify-between gap-4 items-center"
+      >
+        <span>
+          Track<span className="text-red-400">*</span>:
+        </span>
         <input
           type="file"
           name="file"
@@ -94,21 +89,34 @@ export default function NewChallengeForm() {
           required
           className="rounded border border-neutral-800 p-1.5 dark:border-neutral-300"
           onChange={onFileUpdate}
-          defaultValue={data?.file?.name}
+          defaultValue={track?.name}
+          aria-describedby="fileInputHelper"
         />
       </label>
-
-      <label htmlFor="activeDate" className="flex justify-between gap-4">
-        <span>Active Date:</span>
+      <p className="mt-1 text-sm text-neutral-500" id="fileInputHelper">
+        WAV/MP3 (Max 10mb)
+      </p>
+      <label
+        htmlFor="activeDate"
+        className="flex justify-between gap-4 items-center"
+      >
+        <span>
+          Active Date<span className="text-red-400">*</span>:
+        </span>
         <input
           type="date"
           name="active-date"
           id="activeDate"
           required
           className="rounded border border-neutral-800 p-1.5 dark:border-neutral-300"
+          min={tomorrow}
+          defaultValue={tomorrow}
         />
       </label>
-
+      <p className="text-neutral-500" id="formHelperText">
+        All fields marked with (<span className="text-red-400">*</span>) are
+        reuired!
+      </p>
       <button
         disabled={pending}
         type="submit"

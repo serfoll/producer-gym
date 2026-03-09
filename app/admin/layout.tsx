@@ -1,5 +1,5 @@
-import Modal from "@/components/modal";
-import NewChallengeForm from "./components/new-challenge-form";
+import { Modal } from "@/components";
+import { NewChallengeForm } from "./components";
 
 export default function AdminLayout({
   children,
