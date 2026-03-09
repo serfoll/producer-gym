@@ -7,6 +7,7 @@ import type { ActionState, NewChallenge } from "@/lib/types";
 import { addChallengeActionState } from "@/lib/actions";
 import StatusDisplay from "./status-display";
 import { addDays } from "date-fns";
+import { useFormStatus } from "react-dom";
 
 const initialState: ActionState = null;
 
@@ -15,6 +16,9 @@ export default function NewChallengeForm() {
     addChallengeActionState,
     initialState,
   );
+
+  const isPending = useFormStatus();
+
   const data = state?.data as NewChallenge;
   const today = new Date();
   const tomorrow = addDays(
@@ -79,7 +83,7 @@ export default function NewChallengeForm() {
         className="flex justify-between gap-4 items-center"
       >
         <span>
-          Track<span className="text-red-400">*</span>:
+          Upload Track<span className="text-red-400">*</span>:
         </span>
         <input
           type="file"
@@ -87,7 +91,7 @@ export default function NewChallengeForm() {
           id="audioFile"
           accept="audio/wav, audio/mp3"
           required
-          className="rounded border border-neutral-800 p-1.5 dark:border-neutral-300"
+          className="rounded border border-neutral-800 p-1.5 dark:border-neutral-300 cursor-"
           onChange={onFileUpdate}
           defaultValue={track?.name}
           aria-describedby="fileInputHelper"
@@ -133,7 +137,7 @@ export default function NewChallengeForm() {
             </audio>
           </div>
           <button
-            disabled={pending}
+            disabled={isPending?.pending}
             type="reset"
             className="cursor-pointer rounded bg-red-300 p-2 font-medium text-neutral-100 hover:bg-red-600"
             onClick={() => {
