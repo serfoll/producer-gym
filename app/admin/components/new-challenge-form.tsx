@@ -30,7 +30,7 @@ export default function NewChallengeForm() {
   console.log("toISOString: ", tomorrow);
 
   const [track, setTrack] = useState<File | undefined>(undefined);
-  const [fileUrl, setFileUrl] = useState<string | undefined>(undefined);
+  const [fileUrl, setTrackUrl] = useState<string | undefined>(undefined);
 
   const onFileUpdate = async (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
@@ -44,9 +44,9 @@ export default function NewChallengeForm() {
 
     if (trackFile) {
       const _fileUrl = URL.createObjectURL(trackFile as Blob);
-      setFileUrl(_fileUrl);
+      setTrackUrl(_fileUrl);
     } else {
-      setFileUrl(undefined);
+      setTrackUrl(undefined);
     }
   };
 
@@ -121,14 +121,27 @@ export default function NewChallengeForm() {
         All fields marked with (<span className="text-red-400">*</span>) are
         reuired!
       </p>
-      <button
-        disabled={pending}
-        type="submit"
-        className="w-fit cursor-pointer rounded p-2 font-medium bg-indigo-100 hover:bg-indigo-400 hover:text-neutral-50"
-      >
-        Create Challenge
-      </button>
+      <div className="flex items-center gap-4">
+        <button
+          disabled={pending}
+          type="submit"
+          className="w-fit cursor-pointer rounded p-2 font-medium bg-indigo-100 hover:bg-indigo-400 hover:text-neutral-50"
+        >
+          Create Challenge
+        </button>
 
+        <button
+          disabled={pending}
+          type="reset"
+          className="cursor-pointer w-fit rounded bg-red-300 p-2 font-medium text-neutral-100 hover:bg-red-600"
+          onClick={() => {
+            setTrackUrl(undefined);
+            setTrack(undefined);
+          }}
+        >
+          Reset
+        </button>
+      </div>
       {fileUrl && track && (
         <div className="mt-4 flex items-center gap-4">
           <div>
@@ -136,17 +149,6 @@ export default function NewChallengeForm() {
               <track kind="captions" />
             </audio>
           </div>
-          <button
-            disabled={isPending?.pending}
-            type="reset"
-            className="cursor-pointer rounded bg-red-300 p-2 font-medium text-neutral-100 hover:bg-red-600"
-            onClick={() => {
-              setFileUrl(undefined);
-              setTrack(undefined);
-            }}
-          >
-            Remove
-          </button>
         </div>
       )}
     </Form>
