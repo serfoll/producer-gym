@@ -1,9 +1,13 @@
 import prisma from "@/lib/services/prisma";
+import { format, addDays, startOfDay } from "date-fns";
 
 export default async function Home() {
+  const today = format(new Date(), "yyyy-MM-dd'T00:00:00.000Z'");
+
   const challenge = await prisma.challenge.findUnique({
-    where: { activeDate: new Date().toISOString(), isActive: true },
+    where: { activeDate: today, isActive: true },
   });
+
   const submissions = await prisma.submission.findMany({
     where: { challengeId: challenge?.id },
   });

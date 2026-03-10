@@ -2,6 +2,7 @@ import { type Prisma, PrismaClient } from "@/app/generated/prisma/client";
 import { anaylizeAndExtractAudioFeatures } from "@/lib/audio-analyzer";
 import { submissionScore as getsSubmissionScore } from "@/lib/calculate-score";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { formatDate } from "date-fns";
 import "dotenv/config";
 
 const adapter = new PrismaPg({
@@ -29,7 +30,7 @@ export async function main() {
       blobUrl: challengeBlobUrl,
       duration: 16,
       referenceFeatures: challengeFeatures,
-      activeDate: new Date(Date.UTC(2026, 2, 3, 0, 0, 0)),
+      activeDate: formatDate(new Date(), "yyyy-MM-dd'T00:00:00.000Z'"),
       isActive: true,
       submissions: {
         create: [
