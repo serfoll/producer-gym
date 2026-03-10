@@ -32,6 +32,11 @@ export async function createBlobFromLocalPath(fileName: string) {
 export const generateEncryptedString = async (byte = 32): Promise<string> =>
   crypto.randomBytes(byte).toString("hex");
 
+export const capitaliseScoreKeyString = (key: string): string => {
+  const keyStr = key.split("Score")[0];
+  return keyStr.charAt(0).toUpperCase() + keyStr.slice(1);
+};
+
 export async function generateSASURL(
   contentType: string,
 ): Promise<{ [key: string]: string }> {

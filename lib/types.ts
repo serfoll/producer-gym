@@ -1,11 +1,18 @@
 // this is just a type for the states in our ActionState
+export enum StatusState {
+  ERROR,
+  SUCCESS,
+  INFO,
+}
+
 export type ActionState = {
   message: string;
   data: unknown;
-  errors?: Record<string, string[]>;
+  status?: StatusState;
+  error?: Record<string, string>;
 } | null;
 
-export type NewChallge = {
+export type NewChallenge = {
   title: string | undefined;
   file: File | undefined;
 };

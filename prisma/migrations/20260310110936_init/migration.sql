@@ -3,15 +3,14 @@ CREATE TABLE "Challenge" (
     "id" TEXT NOT NULL,
     "title" TEXT NOT NULL,
     "description" TEXT,
-    "referenceBlobUrl" TEXT NOT NULL,
-    "referenceDuration" DOUBLE PRECISION NOT NULL,
-    "bpm" DOUBLE PRECISION NOT NULL,
-    "key" TEXT NOT NULL,
-    "referenceFeatures" JSONB NOT NULL,
+    "blobUrl" TEXT NOT NULL,
+    "duration" DOUBLE PRECISION NOT NULL,
     "activeDate" TIMESTAMP(3) NOT NULL,
-    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "referenceFeatures" JSONB NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "featuresId" TEXT NOT NULL,
 
     CONSTRAINT "Challenge_pkey" PRIMARY KEY ("id")
 );
@@ -23,13 +22,15 @@ CREATE TABLE "Submission" (
     "blobUrl" TEXT NOT NULL,
     "duration" DOUBLE PRECISION NOT NULL,
     "username" TEXT NOT NULL,
+    "referenceFeatures" JSONB NOT NULL,
     "overallScore" DOUBLE PRECISION NOT NULL,
     "tempoScore" DOUBLE PRECISION NOT NULL,
-    "keySocre" DOUBLE PRECISION NOT NULL,
+    "keyScore" DOUBLE PRECISION NOT NULL,
     "rhythmScore" DOUBLE PRECISION NOT NULL,
     "energyScore" DOUBLE PRECISION NOT NULL,
     "processingTimeMs" INTEGER,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Submission_pkey" PRIMARY KEY ("id")
 );
@@ -38,7 +39,10 @@ CREATE TABLE "Submission" (
 CREATE UNIQUE INDEX "Challenge_activeDate_key" ON "Challenge"("activeDate");
 
 -- CreateIndex
-CREATE INDEX "Submission_challengeId_overallScore_idx" ON "Submission"("challengeId", "overallScore" DESC);
+CREATE INDEX "Submission_challengeId_overallScore_createdAt_idx" ON "Submission"("challengeId", "overallScore" DESC, "createdAt");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Submission_challengeId_username_key" ON "Submission"("challengeId", "username");
 
 -- AddForeignKey
 ALTER TABLE "Submission" ADD CONSTRAINT "Submission_challengeId_fkey" FOREIGN KEY ("challengeId") REFERENCES "Challenge"("id") ON DELETE CASCADE ON UPDATE CASCADE;

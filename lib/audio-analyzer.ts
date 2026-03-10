@@ -78,7 +78,7 @@ async function decodeAudioToFloat32(url: string): Promise<Float32Array> {
 
     ffmpeg.on("close", (code) => {
       if (code !== 0) {
-        reject(new Error("ffmpeg decoding failed"));
+        reject(new Error(`ffmpeg decoding failed: ${code}`));
         return;
       }
 
@@ -218,6 +218,42 @@ function computeSpectral(
  * - duration: Length of the audio signal in seconds.
  * - analysisVersion: Version tag for feature extraction logic.
  */
+
+export async function getTempoAndKey(
+  url: string,
+): Promise<Record<string, Record<string, string | number> | number> | null> {
+  const essentia = getEssentia();
+  // Convert (signal) Float32Array to Essentia VectorFloat
+  const signal = await decodeAudioToFloat32(url);
+  const signalVector = essentia.arrayToVector(signal);
+
+  //Tempo detection using beat tracking
+  const rhythm = essentia.RhythmExtractor2013(signalVector);
+  const ticks = essentia.vectorToArray(rhythm.ticks);
+
+  // track duration
+  const duration = signal.length / SAMPLE_RATE;
+
+  const tempo = {
+    bpm: rhythm.bpm as number,
+    confidence: rhythm.confidence as number,
+    onsetRate: ticks.length / duration,
+  };
+
+  // Key detection using total profile analysis
+  const keyResult = essentia.KeyExtractor(signalVector);
+  const key = {
+    estimatedKey: keyResult.key as string,
+    mode: keyResult.scale as string,
+    strength: keyResult.strength,
+  };
+
+  return {
+    tempo,
+    key,
+    duration,
+  };
+}
 
 export async function anaylizeAndExtractAudioFeatures(
   blobUrl: string,
