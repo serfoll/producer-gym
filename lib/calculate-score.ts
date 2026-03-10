@@ -116,7 +116,7 @@ export function submissionScore(
     keyScore: Math.round(keyScore * 100),
     rhythmScore: Math.round(rhythmScore * 100),
     dynamicsScore: Math.round(dynamicsScore * 100),
-    spectraScore: Math.round(spectraScore * 100),
+    spectralScore: Math.round(spectraScore * 100),
     structureScore: Math.round(structureScore * 100),
     overallScore: Math.round(overallScore * 100),
   };

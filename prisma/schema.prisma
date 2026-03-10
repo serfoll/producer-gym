@@ -14,54 +14,36 @@ datasource db {
 }
 
 model Challenge {
-  id          String  @id @default(cuid())
-  title       String
-  description String?
-
-  // Reference audio
-  blobUrl  String
-  duration Float
-
-  // Cached metadata (derived from referenceFeatures)
-  bpm Float
-  key String
-
-  // Precomputed DSP snapshot
+  id                String       @id @default(cuid())
+  title             String
+  description       String?
+  blobUrl           String
+  duration          Float
+  activeDate        DateTime     @unique
   referenceFeatures Json
-
-  // Daily rotation
-  activeDate DateTime @unique
-  isActive   Boolean  @default(true)
-
-  submissions Submission[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isActive          Boolean      @default(false)
+  submissions       Submission[]
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 }
 
 model Submission {
-  id String @id @default(cuid())
-
-  challengeId String
-  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-
-  blobUrl  String
-  duration Float
-
-  submissionFeatures Json
-
-  username String
-
-  overallScore Float
-  tempoScore   Float
-  keyScore     Float
-  rhythmScore  Float
-  energyScore  Float
-
-  processingTimeMs Int?
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                String    @id @default(cuid())
+  challengeId       String
+  challenge         Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  blobUrl           String
+  duration          Float
+  username          String
+  referenceFeatures Json
+  overallScore      Float
+  tempoScore        Float
+  keyScore          Float
+  rhythmScore       Float
+  dynamicsScore     Float
+  structureScore    Float
+  spectralScore     Float
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   // only one submission per user per challenge
   @@unique([challengeId, username])

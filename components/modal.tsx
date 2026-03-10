@@ -12,7 +12,7 @@ export default function Modal({
       id="new-challenge-modal"
       popover="auto"
     >
-      <div className="h-full grid items-center justify-center bg-gray-900/40 dark:bg-neutral-50/40 transition-opacity">
+      <div className="h-full grid items-center justify-center bg-gray-900/40 dark:bg-neutral-50/40 transition-opacity px-4 md:px-0">
         <div className="mb-4 grid w-fit grid-rows-[auto_1fr] rounded-xl bg-neutral-200 p-4">
           <button
             type="button"

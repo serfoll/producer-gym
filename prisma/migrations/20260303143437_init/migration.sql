@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Challenge" ALTER COLUMN "bpm" DROP NOT NULL,
-ALTER COLUMN "key" DROP NOT NULL;
