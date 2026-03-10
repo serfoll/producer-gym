@@ -7,7 +7,6 @@ import type { ActionState, NewChallenge } from "@/lib/types";
 import { addChallengeActionState } from "@/lib/actions";
 import StatusDisplay from "./status-display";
 import { addDays } from "date-fns";
-import { useFormStatus } from "react-dom";
 
 const initialState: ActionState = null;
 
@@ -17,8 +16,6 @@ export default function NewChallengeForm() {
     initialState,
   );
 
-  const isPending = useFormStatus();
-
   const data = state?.data as NewChallenge;
   const today = new Date();
   const tomorrow = addDays(
@@ -27,7 +24,6 @@ export default function NewChallengeForm() {
   )
     .toISOString()
     .split("T")[0];
-  console.log("toISOString: ", tomorrow);
 
   const [track, setTrack] = useState<File | undefined>(undefined);
   const [fileUrl, setTrackUrl] = useState<string | undefined>(undefined);
@@ -75,6 +71,20 @@ export default function NewChallengeForm() {
           required
           className="rounded border border-neutral-800 p-1.5 dark:border-neutral-300"
           defaultValue={data?.title}
+        />
+      </label>
+
+      <label
+        htmlFor="description"
+        className="flex justify-between gap-4 items-center"
+      >
+        <span>Description:</span>
+        <input
+          type="text"
+          name="description"
+          id="description"
+          className="rounded border border-neutral-800 p-1.5 dark:border-neutral-300"
+          defaultValue={data?.description}
         />
       </label>
 
