@@ -5,6 +5,7 @@ import { calculateTtl, getUTCDate } from "@/lib/utils";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const today = getUTCDate();
+
   const res = await prisma.challenge.findFirst({
     where: { activeDate: today },
   });

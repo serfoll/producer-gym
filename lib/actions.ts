@@ -2,7 +2,7 @@
 import { formatISO, ISOStringFormat } from "date-fns";
 import { anaylizeAndExtractAudioFeatures } from "./audio-analyzer";
 import { type NewChallengeData, StatusState, type ActionState } from "./types";
-import { uploadBlodViaSAS } from "./utils";
+import { uploadBlodViaSAS } from "./blob-server";
 import prisma from "./services/prisma";
 import { revalidatePath } from "next/cache";
 

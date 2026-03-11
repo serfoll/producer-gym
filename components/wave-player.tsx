@@ -1,14 +1,14 @@
 "use client";
 
-import { TrackFeatures } from "@/lib/types";
-import WavesurferPlayer from "@wavesurfer/react";
 import { useState } from "react";
+import WavesurferPlayer from "@wavesurfer/react";
+import type { ChallengeResponse, TrackFeatures } from "@/lib/types";
 import type WaveSurfer from "wavesurfer.js";
 
 export default function WavePlayer({
   challenge,
 }: {
-  challenge: { [key: string]: string | number | Date | {} };
+  challenge: ChallengeResponse;
 }): React.ReactNode {
   const [wavesurfer, setWavesurfer] = useState<WaveSurfer | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
