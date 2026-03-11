@@ -23,6 +23,16 @@ export interface NewChallengeData {
   referenceFeatures: TrackFeatures;
 }
 
+export interface ChallengeResponse {
+  id: string;
+  title: string;
+  description?: string;
+  duration: number;
+  activeDate: ISOStringFormat;
+  blobUrl: string;
+  referenceFeatures: TrackFeatures;
+}
+
 export type TrackFeatures = {
   tempo: {
     bpm: number;
