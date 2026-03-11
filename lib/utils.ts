@@ -51,7 +51,7 @@ export function calculateTtl(): number {
 
   const ttl = Math.floor((timeToNextDayUTC - now.getTime()) / 1000);
 
-  return Math.max(ttl, 0);
+  return Math.max(ttl, 1);
 }
 
 export function formatTime(seconds: number): { [key: string]: string } {

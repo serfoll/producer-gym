@@ -40,21 +40,17 @@ export default function useDailyChallenge() {
 
       if (secondsRemaining === 0 && countDownIntervalRef.current) {
         clearInterval(countDownIntervalRef.current);
+
+        fetchChallenge();
       }
     }, 1000);
-  };
-
-  const startRefreshTimer = (seconds: number) => {
-    refreshTimeoutRef.current = setTimeout(() => {
-      fetchChallenge();
-    }, seconds * 1000);
   };
 
   const fetchChallenge = async () => {
     try {
       setIsLoading(true);
 
-      const res = await fetch("/api/challenges/today");
+      const res = await fetch("/api/challenges/today", { cache: "no-store" });
 
       if (!res.ok) {
         throw new Error(`Response not ok! ${res.status}`);
@@ -76,13 +72,18 @@ export default function useDailyChallenge() {
 
       // ui countdown using local time
       const localSeconds = getLocalTimeToNextChallenge();
-      unlockTimestampRef.current = Date.now() + localSeconds * 1000;
 
-      setTimeToNextChallenge(localSeconds);
+      // if the time difference between server time(UTC) and local time is > 1hr countdown based on local time else server time
+      const countdownSeconds =
+        Math.abs(localSeconds - secondsToNextChallenge) > 3600
+          ? localSeconds
+          : secondsToNextChallenge;
+
+      unlockTimestampRef.current = Date.now() + countdownSeconds * 1000;
+
+      setTimeToNextChallenge(countdownSeconds);
 
       startCountDown();
-
-      startRefreshTimer(secondsToNextChallenge);
     } catch (error) {
       setError(error);
     } finally {
@@ -92,8 +93,15 @@ export default function useDailyChallenge() {
 
   useEffect(() => {
     fetchChallenge();
+    const onFocus = () => {
+      if (Date.now() >= unlockTimestampRef.current) {
+        fetchChallenge();
+      }
+    };
 
-    return () => clearTimers();
+    window.addEventListener("focus", onFocus);
+
+    return () => window.removeEventListener("focus", onFocus);
   }, []);
 
   return {
