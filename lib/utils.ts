@@ -124,3 +124,29 @@ export async function uploadBlodViaSAS(
 export function clamp(value: number, min = 0, max = 1): number {
   return Math.min(max, Math.max(min, value));
 }
+
+export function getUTCDate(daysToAdd = 0): Date {
+  const now = new Date();
+  const today = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + daysToAdd,
+      0,
+      0,
+      0,
+      0,
+    ),
+  );
+
+  return today;
+}
+
+export function calculateTtl(): number {
+  const now = new Date();
+  const timeToNextDayUTC = getUTCDate(1).getTime();
+
+  const ttl = Math.floor((timeToNextDayUTC - now.getTime()) / 1000);
+
+  return Math.max(ttl, 1);
+}

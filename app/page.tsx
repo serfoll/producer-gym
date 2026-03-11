@@ -1,14 +1,21 @@
-import { format } from "date-fns";
 import { WavePlayer } from "@/components";
 import prisma from "@/lib/services/prisma";
-import { ChallengeResponse } from "@/lib/types";
+import type { ChallengeResponse } from "@/lib/types";
 
 export default async function Home() {
-  const today = format(new Date(), "yyyy-MM-dd'T00:00:00.000Z'");
-
-  const challenge = await prisma.challenge.findUnique({
-    where: { activeDate: today },
+  const res = await fetch("http:localhost:3000/api/challenges/today", {
+    cache: "no-cache",
   });
+
+  if (!res.ok) return <div>No challenge available at the moment!</div>;
+
+  const {
+    challenge,
+    secondsToNextChallenge,
+  }: { challenge: ChallengeResponse; secondsToNextChallenge: number } =
+    await res.json();
+
+  console.log(secondsToNextChallenge);
 
   if (!challenge)
     return <div>No challenge challenge available at the moment!</div>;
