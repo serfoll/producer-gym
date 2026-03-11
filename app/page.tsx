@@ -1,14 +1,17 @@
 import { format } from "date-fns";
 import { WavePlayer } from "@/components";
 import prisma from "@/lib/services/prisma";
+import { ChallengeResponse } from "@/lib/types";
 
 export default async function Home() {
   const today = format(new Date(), "yyyy-MM-dd'T00:00:00.000Z'");
 
   const challenge = await prisma.challenge.findUnique({
-    where: { activeDate: today, isActive: true },
+    where: { activeDate: today },
   });
 
+  if (!challenge)
+    return <div>No challenge challenge available at the moment!</div>;
   const submissions = await prisma.submission.findMany({
     where: { challengeId: challenge?.id },
   });
@@ -16,7 +19,7 @@ export default async function Home() {
   return (
     <main>
       <h1>Today's Challenge: {challenge?.title}</h1>
-      <WavePlayer url="https://prgymstorage.blob.core.windows.net/dev/0ce1b3c5c82d6880a339efa60018b3e96504f9a4b187fd17a16a5ee207c77df1" />
+      <WavePlayer challenge={challenge} />
       {/*Leaderboard goes here*/}
       <aside>
         <section>

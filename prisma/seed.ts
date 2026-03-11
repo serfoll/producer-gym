@@ -31,7 +31,6 @@ export async function main() {
       duration: 16,
       referenceFeatures: challengeFeatures,
       activeDate: formatDate(new Date(), "yyyy-MM-dd'T00:00:00.000Z'"),
-      isActive: true,
       submissions: {
         create: [
           {
