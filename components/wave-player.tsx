@@ -18,7 +18,7 @@ export default function WavePlayer({ url }: { url: string }): React.ReactNode {
   };
 
   return (
-    <div>
+    <div className="grid">
       <WavesurferPlayer
         height={100}
         waveColor={"violet"}
@@ -26,11 +26,14 @@ export default function WavePlayer({ url }: { url: string }): React.ReactNode {
         onReady={onReady}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
-        width={250}
       />
 
-      <button type="button" onClick={onPlayPause}>
-        {isPlaying ? "Pause" : "Play"}
+      <button
+        type="button"
+        onClick={onPlayPause}
+        className="cursor-pointer rounded bg-indigo-200 p-2 font-medium text-neutral-900 transition duration-150 hover:bg-indigo-400 hover:text-neutral-200 min-w-20 mx-auto"
+      >
+        {isPlaying ? "Pause" : "Listen"}
       </button>
     </div>
   );
