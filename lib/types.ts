@@ -1,3 +1,5 @@
+import type { ISOStringFormat } from "date-fns";
+
 // this is just a type for the states in our ActionState
 export enum StatusState {
   ERROR,
@@ -12,10 +14,24 @@ export type ActionState = {
   error?: Record<string, string>;
 } | null;
 
-export type NewChallenge = {
-  title: string | undefined;
-  file: File | undefined;
-};
+export interface NewChallengeData {
+  title: string;
+  description?: string;
+  duration: number;
+  activeDate: ISOStringFormat;
+  blobUrl: string;
+  referenceFeatures: TrackFeatures;
+}
+
+export interface ChallengeResponse {
+  id: string;
+  title: string;
+  description?: string;
+  duration: number;
+  activeDate: ISOStringFormat;
+  blobUrl: string;
+  referenceFeatures: TrackFeatures;
+}
 
 export type TrackFeatures = {
   tempo: {
@@ -51,6 +67,7 @@ export type TrackFeatures = {
   structure: {
     energyEnvelope: number[];
   };
+  duration: number;
   analysisVersion: string;
 };
 

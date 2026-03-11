@@ -21,7 +21,6 @@ model Challenge {
   duration          Float
   activeDate        DateTime     @unique
   referenceFeatures Json
-  isActive          Boolean      @default(false)
   submissions       Submission[]
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt

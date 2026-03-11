@@ -337,6 +337,7 @@ export async function anaylizeAndExtractAudioFeatures(
     dynamics,
     spectral,
     structure,
+    duration: Math.floor(duration),
     analysisVersion: "v1",
   };
 }
