@@ -11,9 +11,6 @@ export default async function AdminPage() {
           <li key={c.id}>
             <h3>{c.title}</h3>
             {c.description && <p>{c.description}</p>}
-            <p>
-              <span>status: </span> {c.isActive ? "true" : "false"}
-            </p>
           </li>
         ))}
       </ul>

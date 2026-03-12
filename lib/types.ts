@@ -1,6 +1,3 @@
-import { JsonValue } from "@prisma/client/runtime/client";
-import type { ISOStringFormat } from "date-fns";
-
 // this is just a type for the states in our ActionState
 export enum StatusState {
   ERROR,
@@ -14,25 +11,6 @@ export type ActionState = {
   status?: StatusState;
   error?: Record<string, string>;
 } | null;
-
-export interface NewChallengeData {
-  title: string;
-  description?: string;
-  duration: number;
-  activeDate: ISOStringFormat;
-  blobUrl: string;
-  referenceFeatures: TrackFeatures;
-}
-
-export interface ChallengeResponse {
-  id: string | undefined;
-  title: string | undefined;
-  description?: string | null | undefined;
-  duration: number | undefined;
-  activeDate: Date | undefined;
-  blobUrl: string | undefined;
-  referenceFeatures: JsonValue | undefined;
-}
 
 export type TrackFeatures = {
   tempo: {

@@ -1,13 +1,15 @@
 import { type NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/services/prisma";
-import type { ChallengeResponse } from "@/lib/types";
-import { calculateTtl, getUTCDate } from "@/lib/utils";
+import { getUTCDate } from "@/lib/utils";
+import type {
+  ChallengeResponse,
+  DailyChallengeResponse,
+} from "@/lib/challenge-types";
 
-export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const today = getUTCDate();
   const tomorrow = getUTCDate(1);
-  const res = await prisma.challenge.findFirst({
+  const dbResponse = await prisma.challenge.findFirst({
     where: {
       activeDate: {
         gte: today,
@@ -16,8 +18,12 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     },
   });
 
-  if (!res) {
-    return NextResponse.error();
+  if (!dbResponse) {
+    const error = NextResponse.error();
+
+    throw new Error(
+      `Failed to get challenge from db! Msg: ${error.statusText}! Status: ${error.status}.`,
+    );
   }
 
   const {
@@ -28,7 +34,7 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     id,
     referenceFeatures,
     title,
-  } = res;
+  } = dbResponse;
 
   const challenge: ChallengeResponse = {
     activeDate,
@@ -40,7 +46,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     title,
   };
 
-  const secondsToNextChallenge = calculateTtl();
+  const response: DailyChallengeResponse = {
+    challenge,
+    nextChallengeAtUTC: tomorrow,
+    serverNowUTC: new Date(),
+  };
 
-  return NextResponse.json({ challenge, secondsToNextChallenge });
+  return NextResponse.json(response);
 }

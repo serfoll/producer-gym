@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import WavesurferPlayer from "@wavesurfer/react";
-import type { ChallengeResponse, TrackFeatures } from "@/lib/types";
+import type { TrackFeatures } from "@/lib/types";
 import type WaveSurfer from "wavesurfer.js";
+import { ChallengeResponse } from "@/lib/challenge-types";
 
 export default function WavePlayer({
   challenge,
@@ -22,15 +23,7 @@ export default function WavePlayer({
     wavesurfer?.playPause();
   };
 
-  const {
-    blobUrl,
-    duration,
-    referenceFeatures: features,
-  }: {
-    blobUrl: string;
-    duration: number;
-    referenceFeatures: TrackFeatures;
-  } = challenge;
+  const { blobUrl, duration, referenceFeatures: features } = challenge;
 
   return (
     <div className="grid">
