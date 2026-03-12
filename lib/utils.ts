@@ -30,7 +30,7 @@ export function getLocalTimeToNextChallenge() {
 
 export function getUTCDate(daysToAdd = 0): Date {
   const now = new Date();
-  const today = new Date(
+  const date = new Date(
     Date.UTC(
       now.getUTCFullYear(),
       now.getUTCMonth(),
@@ -42,7 +42,7 @@ export function getUTCDate(daysToAdd = 0): Date {
     ),
   );
 
-  return today;
+  return date;
 }
 
 export function calculateTtl(): number {
@@ -64,4 +64,21 @@ export function formatTime(seconds: number): { [key: string]: string } {
   const hrsStr = hrs.toString().padStart(2, "0");
 
   return { hrsStr, minsStr, secsStr };
+}
+
+export function msToNextDayUTC() {
+  const now = new Date();
+  const nextDay = new Date(
+    Date.UTC(
+      now.getUTCFullYear(),
+      now.getUTCMonth(),
+      now.getUTCDate() + 1,
+      0,
+      0,
+      0,
+      0,
+    ),
+  );
+
+  return nextDay.getTime() - now.getTime();
 }

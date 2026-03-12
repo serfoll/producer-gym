@@ -1,4 +1,4 @@
-import Challenge from "@/components/challenge-component";
+import { Challenge } from "@/components";
 
 export default async function Home() {
   return (
