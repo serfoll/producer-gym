@@ -31,7 +31,7 @@ export default function useDailyChallenge() {
 
   // count down to next challenge refresh every second
   const startCountDown = () => {
-    countDownIntervalRef.current = setInterval(() => {
+    countDownIntervalRef.current = setInterval(async () => {
       const remaningMs = unlockTimestampRef.current - Date.now();
 
       const secondsRemaining = Math.max(Math.floor(remaningMs / 1000), 0);
@@ -41,9 +41,18 @@ export default function useDailyChallenge() {
       if (secondsRemaining === 0 && countDownIntervalRef.current) {
         clearInterval(countDownIntervalRef.current);
 
-        fetchChallenge();
+        console.log("fetch new challenge local");
+        await fetchChallenge();
       }
     }, 1000);
+  };
+
+  // fetch todays challenge
+  const startRefreshTimer = (seconds: number) => {
+    refreshTimeoutRef.current = setTimeout(async () => {
+      console.log("fetch new challenge UTC");
+      await fetchChallenge();
+    }, seconds * 1000);
   };
 
   const fetchChallenge = async () => {
