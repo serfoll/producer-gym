@@ -3,6 +3,7 @@
 import { DailyChallengeResponse } from "@/lib/challenge-types";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
+import { useServerTime } from "./user-server-time";
 
 async function fetchDailyChallenge(): Promise<DailyChallengeResponse> {
   const res = await fetch("/api/challenges/today", { cache: "no-store" });
@@ -13,17 +14,6 @@ async function fetchDailyChallenge(): Promise<DailyChallengeResponse> {
 
   const challenge = await res.json();
   return challenge;
-}
-
-function getServerOffset(serverNowUTC: Date): number {
-  const server = new Date(serverNowUTC).getTime(); // server time to local time
-  const client = Date.now();
-
-  return server - client;
-}
-
-function createServerNow(offset: number): () => number {
-  return () => Date.now() + offset;
 }
 
 // cache result, deduplicate requests and share data across components
@@ -37,20 +27,14 @@ export function useDailyChallengeQuery() {
     refetchOnWindowFocus: true,
   });
 
-  const serverOffset = useMemo(() => {
-    if (!query.data) return;
-
-    return getServerOffset(query.data.serverNowUTC);
-  }, [query.data]);
-
-  const getServerNow = useMemo(() => {
-    return createServerNow(serverOffset as number);
-  }, [serverOffset]);
+  const { serverOffset, getServerNow } = useServerTime(
+    query.data?.serverNowUTC,
+  );
 
   useEffect(() => {
     if (!query.data) return;
 
-    const next = new Date(query.data.nextChallengeAtUTC).getTime() + 5000;
+    const next = new Date(query.data.nextChallengeAtUTC).getTime();
     const now = getServerNow();
 
     const timeout = Math.max(0, next - now);
