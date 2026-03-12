@@ -54,11 +54,20 @@ export function calculateTtl(): number {
   return Math.max(ttl, 1);
 }
 
-export function formatTime(seconds: number): { [key: string]: string } {
-  const hrs = Math.floor(seconds / 3600);
-  const mins = Math.floor((seconds % 3600) / 60);
-  const secs = seconds % 60;
+type Timer = {
+  hrsStr: string;
+  minsStr: string;
+  secsStr: string;
+};
 
+export function formatTime(mSec: number): Timer {
+  const totalSec = Math.floor(mSec / 1000);
+
+  const hrs = Math.floor(totalSec / 3600);
+  const mins = Math.floor((totalSec % 3600) / 60);
+  const secs = totalSec % 60;
+
+  // time to string
   const secsStr = secs.toString().padStart(2, "0");
   const minsStr = mins.toString().padStart(2, "0");
   const hrsStr = hrs.toString().padStart(2, "0");

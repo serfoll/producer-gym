@@ -1,8 +1,12 @@
 "use client";
 
-import { DailyChallengeResponse } from "@/lib/challenge-types";
+import type { DailyChallengeResponse } from "@/lib/challenge-types";
+import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo } from "react";
+import { useServerTime } from "./user-server-time";
+
+let refreshTimer: NodeJS.Timeout | null = null;
+let prefetchTimer: NodeJS.Timeout | null = null;
 
 async function fetchDailyChallenge(): Promise<DailyChallengeResponse> {
   const res = await fetch("/api/challenges/today", { cache: "no-store" });
@@ -13,17 +17,6 @@ async function fetchDailyChallenge(): Promise<DailyChallengeResponse> {
 
   const challenge = await res.json();
   return challenge;
-}
-
-function getServerOffset(serverNowUTC: Date): number {
-  const server = new Date(serverNowUTC).getTime(); // server time to local time
-  const client = Date.now();
-
-  return server - client;
-}
-
-function createServerNow(offset: number): () => number {
-  return () => Date.now() + offset;
 }
 
 // cache result, deduplicate requests and share data across components
@@ -37,30 +30,36 @@ export function useDailyChallengeQuery() {
     refetchOnWindowFocus: true,
   });
 
-  const serverOffset = useMemo(() => {
-    if (!query.data) return;
-
-    return getServerOffset(query.data.serverNowUTC);
-  }, [query.data]);
-
-  const getServerNow = useMemo(() => {
-    return createServerNow(serverOffset as number);
-  }, [serverOffset]);
+  const { serverOffset, getServerNow } = useServerTime(
+    query.data?.serverNowUTC,
+  );
 
   useEffect(() => {
     if (!query.data) return;
 
-    const next = new Date(query.data.nextChallengeAtUTC).getTime() + 5000;
+    const next = new Date(query.data.nextChallengeAtUTC).getTime();
     const now = getServerNow();
 
-    const timeout = Math.max(0, next - now);
+    const refreshTimeout = Math.max(0, next - now);
+    const prefetchTimeout = Math.max(0, refreshTimeout - 5 * 60 * 1000); // preftch 5min before
 
-    const timer = setTimeout(() => {
-      console.log("should refetch");
+    if (refreshTimer) {
+      clearTimeout(refreshTimer);
+    }
+    if (prefetchTimer) {
+      clearTimeout(prefetchTimer);
+    }
+
+    prefetchTimer = setTimeout(() => {
+      queryClient.prefetchQuery({
+        queryKey: ["daily-challenge"],
+        queryFn: fetchDailyChallenge,
+      });
+    }, prefetchTimeout);
+
+    refreshTimer = setTimeout(() => {
       queryClient.invalidateQueries({ queryKey: ["daily-challenge"] });
-    }, timeout);
-
-    return () => clearTimeout(timer);
+    }, refreshTimeout);
   }, [query.data, queryClient, getServerNow]);
 
   return { ...query, serverOffset, getServerNow };
