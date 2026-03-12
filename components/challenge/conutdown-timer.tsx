@@ -1,17 +1,17 @@
 "use client";
 
-import { useDailyChallengeQuery } from "@/hooks/use-daily-challenge-query";
-import { formatTime } from "@/lib/utils";
 import { useEffect, useState } from "react";
+import { formatTime } from "@/lib/utils";
 
-const ONE_HOUR = 3600000; // 1hr in milliseconds
+const SERVER_TIME_TRESHOLD = 3600000 * 2; // 1hr in milliseconds
 
 export default function CountDownTimer({
   nextChallengeAtUTC,
+  getServerNowAction: getServerNow,
 }: {
   nextChallengeAtUTC: Date;
+  getServerNowAction: () => number;
 }) {
-  const { getServerNow } = useDailyChallengeQuery();
   const [timeLeft, setTimeLeft] = useState(0);
 
   useEffect(() => {
@@ -24,14 +24,14 @@ export default function CountDownTimer({
       const serverNow = getServerNow();
       const serverRemaining = next - serverNow;
 
-      const clientDate = new Date(clientNow).getDate();
-      const utcDate = new Date().getUTCDate();
+      const clientDay = new Date(clientNow).getUTCDate();
+      const utcDay = new Date().getUTCDate();
 
       let remaining: number;
 
-      if (clientRemaining <= ONE_HOUR) {
+      if (clientRemaining <= SERVER_TIME_TRESHOLD) {
         remaining = serverRemaining;
-      } else if (clientDate > utcDate) {
+      } else if (clientDay > utcDay) {
         remaining = serverRemaining;
       } else {
         remaining = clientRemaining;

@@ -2,11 +2,11 @@
 
 import WavePlayer from "../wave-player";
 import { useDailyChallengeQuery } from "@/hooks/use-daily-challenge-query";
-import CountDownTimer from "./contdown-timer";
 import type { DailyChallengeResponse } from "@/lib/challenge-types";
+import CountDownTimer from "./conutdown-timer";
 
 export default function Challenge() {
-  const { data, isLoading, error } = useDailyChallengeQuery();
+  const { data, isLoading, error, getServerNow } = useDailyChallengeQuery();
 
   if (isLoading) return <p>Fetching challenges...</p>;
 
@@ -20,7 +20,10 @@ export default function Challenge() {
   return (
     <section>
       <h2>Today's challenge: {challenge?.title}</h2>
-      <CountDownTimer nextChallengeAtUTC={nextChallengeAtUTC} />
+      <CountDownTimer
+        nextChallengeAtUTC={nextChallengeAtUTC}
+        getServerNow={getServerNow}
+      />
       <WavePlayer challenge={challenge} />
     </section>
   );
