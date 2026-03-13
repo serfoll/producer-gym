@@ -1,9 +1,12 @@
+//use-daily-challenge-query.ts
+
 "use client";
 
 import type { DailyChallengeResponse } from "@/lib/challenge-types";
 import { useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerTime } from "./user-server-time";
+import { challengeKeys } from "@/components/challenge/challenge-query-keys";
 
 let refreshTimer: NodeJS.Timeout | null = null;
 let prefetchTimer: NodeJS.Timeout | null = null;
@@ -15,8 +18,8 @@ async function fetchDailyChallenge(): Promise<DailyChallengeResponse> {
     throw new Error(`Failed to fetch daily challenge! Status: ${res.status}`);
   }
 
-  const challenge = await res.json();
-  return challenge;
+  const challenges = await res.json();
+  return challenges;
 }
 
 // cache result, deduplicate requests and share data across components
@@ -24,11 +27,15 @@ export function useDailyChallengeQuery() {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["daily-challenge"],
+    queryKey: challengeKeys.daily(),
     queryFn: fetchDailyChallenge,
     staleTime: Infinity, // audio retchef at midnight of next day UTC
     refetchOnWindowFocus: true,
   });
+
+  const todayChallenge = query?.data?.challenges.find(
+    (c) => c.id === query?.data.todayChallengeId,
+  );
 
   const { serverOffset, getServerNow } = useServerTime(
     query.data?.serverNowUTC,
@@ -60,7 +67,17 @@ export function useDailyChallengeQuery() {
     refreshTimer = setTimeout(() => {
       queryClient.invalidateQueries({ queryKey: ["daily-challenge"] });
     }, refreshTimeout);
+
+    query?.data.challenges.forEach((challenge) => {
+      queryClient.setQueryData(challengeKeys.detail(challenge.id), challenge);
+    });
   }, [query.data, queryClient, getServerNow]);
 
-  return { ...query, serverOffset, getServerNow };
+  return {
+    ...query,
+    todayChallenge,
+    challenges: query?.data?.challenges ?? [],
+    serverOffset,
+    getServerNow,
+  };
 }

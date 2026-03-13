@@ -1,21 +1,21 @@
+//countdown-timer.tsx
+
 "use client";
 
 import { useEffect, useState } from "react";
+import { useDailyChallengeQuery } from "@/hooks/use-daily-challenge-query";
 import { formatTime } from "@/lib/utils";
+import TimerPair from "./timer-pair";
 
 const SERVER_TIME_TRESHOLD = 3600000 * 2; // 1hr in milliseconds
 
-export default function CountDownTimer({
-  nextChallengeAtUTC,
-  getServerNowAction: getServerNow,
-}: {
-  nextChallengeAtUTC: Date;
-  getServerNowAction: () => number;
-}) {
+export default function CountDownTimer() {
+  const { data, getServerNow } = useDailyChallengeQuery();
   const [timeLeft, setTimeLeft] = useState(0);
 
   useEffect(() => {
-    const next = new Date(nextChallengeAtUTC).getTime();
+    if (!data) return;
+    const next = new Date(data.nextChallengeAtUTC).getTime();
 
     const updateTimer = () => {
       const clientNow = Date.now();
@@ -43,25 +43,16 @@ export default function CountDownTimer({
 
     const timer = setInterval(updateTimer, 1000);
     return () => clearInterval(timer);
-  }, [nextChallengeAtUTC, getServerNow]);
+  }, [data, getServerNow]);
 
   const { hrsStr, minsStr, secsStr } = formatTime(timeLeft);
   return (
-    <div>
-      <p className=" font-medium">
-        Next challenge unlocks in:{" "}
-        <span className="text-neutral-700 w-fit rounded p-2 bg-indigo-100 ">
-          {hrsStr}
-        </span>
-        :
-        <span className="text-neutral-700 w-fit rounded p-2 bg-indigo-100 ">
-          {minsStr}
-        </span>
-        :
-        <span className="text-neutral-700 w-fit rounded p-2 bg-indigo-100 ">
-          {secsStr}
-        </span>
-      </p>
+    <div className="flex items-center gap-1 bg-neutral-400 p-2 rounded-md w-fit mx-auto">
+      <TimerPair timerStr={hrsStr} />
+      <span className="font-semibold text-indigo-100 text-xl">:</span>
+      <TimerPair timerStr={minsStr} />
+      <span className="font-semibold text-indigo-100 text-xl">:</span>
+      <TimerPair timerStr={secsStr} />
     </div>
   );
 }

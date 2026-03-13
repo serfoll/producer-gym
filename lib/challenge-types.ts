@@ -15,7 +15,8 @@ export interface ChallengeResponse extends Challenge {
 }
 
 export type DailyChallengeResponse = {
-  challenge: ChallengeResponse;
+  challenges: ChallengeResponse[];
+  todayChallengeId: string;
   nextChallengeAtUTC: Date;
   serverNowUTC: Date;
 };

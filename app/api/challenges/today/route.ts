@@ -1,24 +1,22 @@
 import { type NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/services/prisma";
 import { getUTCDate } from "@/lib/utils";
-import type {
-  ChallengeResponse,
-  DailyChallengeResponse,
-} from "@/lib/challenge-types";
+import type { DailyChallengeResponse } from "@/lib/challenge-types";
 
 export async function GET(req: NextRequest): Promise<NextResponse> {
-  const today = getUTCDate();
   const tomorrow = getUTCDate(1);
-  const dbResponse = await prisma.challenge.findFirst({
+  const limitDay = getUTCDate(-4);
+  const res = await prisma.challenge.findMany({
     where: {
       activeDate: {
-        gte: today,
+        gte: limitDay,
         lt: tomorrow,
       },
     },
+    take: 6,
   });
 
-  if (!dbResponse) {
+  if (!res) {
     const error = NextResponse.error();
 
     throw new Error(
@@ -26,28 +24,9 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const {
-    activeDate,
-    blobUrl,
-    description,
-    duration,
-    id,
-    referenceFeatures,
-    title,
-  } = dbResponse;
-
-  const challenge: ChallengeResponse = {
-    activeDate,
-    blobUrl,
-    description,
-    duration,
-    id,
-    referenceFeatures,
-    title,
-  };
-
   const response: DailyChallengeResponse = {
-    challenge,
+    challenges: res,
+    todayChallengeId: res[res.length - 1]?.id,
     nextChallengeAtUTC: tomorrow,
     serverNowUTC: new Date(),
   };
